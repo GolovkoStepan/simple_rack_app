@@ -17,11 +17,13 @@ class TimeParser
     @invalid_types = @types - FORMAT_TYPES.keys
   end
 
-  def invalid_types?
-    @invalid_types.any?
+  def time
+    Time.now.strftime(formatted_time_str) if @types.any? && @invalid_types.empty?
   end
 
-  def time
-    Time.now.strftime(FORMAT_TYPES.values_at(*@types).join('-')) if @types.any? && @invalid_types.empty?
+  private
+
+  def formatted_time_str
+    FORMAT_TYPES.values_at(*@types).join('-')
   end
 end

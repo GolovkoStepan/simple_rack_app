@@ -8,8 +8,7 @@ class Application
   include Responses
   include Exceptions
 
-  DEFAULT_HEADERS = { 'Content-Type' => 'text/plain' }.freeze
-  TARGET_ROUTE    = '/time'
+  TARGET_ROUTE = '/time'
 
   def call(env)
     with_exception_handling do
@@ -17,23 +16,19 @@ class Application
       raise ResourceNotFound, "Resource not found: #{request.path_info}" unless request.path_info == TARGET_ROUTE
 
       time_parser = TimeParser.new(request.params['format'])
-      raise InvalidQueryFormat, "Unknown time format: #{time_parser.invalid_types}" if time_parser.invalid_types?
+      raise InvalidQueryFormat, "Unknown time format: #{time_parser.invalid_types}" if time_parser.invalid_types.any?
 
-      ok(response_headers, [time_parser.time.to_s])
+      ok({}, [time_parser.time.to_s])
     end
   end
 
   private
 
-  def response_headers(headers = {})
-    DEFAULT_HEADERS.merge(headers)
-  end
-
   def with_exception_handling
     yield
   rescue ResourceNotFound => e
-    not_found(response_headers, [e.message])
+    not_found({}, [e.message])
   rescue InvalidQueryFormat => e
-    bad_request(response_headers, [e.message])
+    bad_request({}, [e.message])
   end
 end
