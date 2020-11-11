@@ -12,13 +12,22 @@ class TimeParser
 
   attr_reader :types, :invalid_types
 
-  def initialize(query_str)
-    @types         = query_str&.split(',') || []
+  def initialize(request)
+    format_str     = request.params['format']
+    @types         = format_str&.split(',') || []
     @invalid_types = @types - FORMAT_TYPES.keys
   end
 
-  def time
-    Time.now.strftime(formatted_time_str) if @types.any? && @invalid_types.empty?
+  def success?
+    @invalid_types.empty?
+  end
+
+  def body
+    (Time.now.strftime(formatted_time_str) if @types.any? && @invalid_types.empty?).to_s
+  end
+
+  def error
+    ("Unknown time format: #{@invalid_types}" if @invalid_types.any?).to_s
   end
 
   private
